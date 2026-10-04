@@ -1,0 +1,440 @@
+{
+	"info": {
+		"_postman_id": "c71a39f0-8c29-4d6b-9c60-84a28f86f874",
+		"name": "Telecom Domain - Contact List API Testing",
+		"description": "Comprehensive API Testing for Contact List Application (https://thinking-tester-contact-list.herokuapp.com/) with Chai library assertions.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Test Case 1: Add New User",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const randomId = Math.floor(Math.random() * 100000);",
+							"pm.environment.set(\"userEmail\", \"testuser_\" + randomId + \"@fake.com\");"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 201 Created\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"",
+							"pm.test(\"Token is generated and stored in environment\", function () {",
+							"    const jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property(\"token\");",
+							"    pm.expect(jsonData.token).to.be.a(\"string\").and.not.empty;",
+							"    pm.environment.set(\"token\", jsonData.token);",
+							"});",
+							"",
+							"pm.test(\"User response matches request payload\", function () {",
+							"    const jsonData = pm.response.json();",
+							"    pm.expect(jsonData.user.firstName).to.eql(\"Test\");",
+							"    pm.expect(jsonData.user.lastName).to.eql(\"User\");",
+							"    pm.expect(jsonData.user.email).to.eql(pm.environment.get(\"userEmail\"));",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"firstName\": \"Test\",\n  \"lastName\": \"User\",\n  \"email\": \"{{userEmail}}\",\n  \"password\": \"myPassword\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/users",
+					"host": ["{{baseUrl}}"],
+					"path": ["users"]
+				}
+			}
+		},
+		{
+			"name": "Test Case 2: Get user Profile",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Validate user profile attributes\", function () {",
+							"    const jsonData = pm.response.json();",
+							"    pm.expect(jsonData.email).to.eql(pm.environment.get(\"userEmail\"));",
+							"    pm.expect(jsonData.firstName).to.eql(\"Test\");",
+							"    pm.expect(jsonData.lastName).to.eql(\"User\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/users/me",
+					"host": ["{{baseUrl}}"],
+					"path": ["users", "me"]
+				}
+			}
+		},
+		{
+			"name": "Test Case 3: Update User",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const randomId = Math.floor(Math.random() * 100000);",
+							"pm.environment.set(\"updatedUserEmail\", \"updated_\" + randomId + \"@fake.com\");"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Validate updated user profile\", function () {",
+							"    const jsonData = pm.response.json();",
+							"    pm.expect(jsonData.firstName).to.eql(\"Updated\");",
+							"    pm.expect(jsonData.lastName).to.eql(\"Username\");",
+							"    pm.expect(jsonData.email).to.eql(pm.environment.get(\"updatedUserEmail\"));",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"firstName\": \"Updated\",\n  \"lastName\": \"Username\",\n  \"email\": \"{{updatedUserEmail}}\",\n  \"password\": \"myNewPassword\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/users/me",
+					"host": ["{{baseUrl}}"],
+					"path": ["users", "me"]
+				}
+			}
+		},
+		{
+			"name": "Test Case 4: Log In User",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Token generated and refreshed upon login\", function () {",
+							"    const jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property(\"token\");",
+							"    pm.expect(jsonData.token).to.be.a(\"string\").and.not.empty;",
+							"    pm.environment.set(\"token\", jsonData.token);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"email\": \"{{updatedUserEmail}}\",\n  \"password\": \"myNewPassword\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/users/login",
+					"host": ["{{baseUrl}}"],
+					"path": ["users", "login"]
+				}
+			}
+		},
+		{
+			"name": "Test Case 5: Add Contact",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 201 Created\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"",
+							"pm.test(\"Contact created and ID captured\", function () {",
+							"    const jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property(\"_id\");",
+							"    pm.environment.set(\"contactId\", jsonData._id);",
+							"    pm.expect(jsonData.firstName).to.eql(\"John\");",
+							"    pm.expect(jsonData.lastName).to.eql(\"Doe\");",
+							"    pm.expect(jsonData.email).to.eql(\"jdoe@fake.com\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"birthdate\": \"1970-01-01\",\n  \"email\": \"jdoe@fake.com\",\n  \"phone\": \"8005555555\",\n  \"street1\": \"1 Main St.\",\n  \"street2\": \"Apartment A\",\n  \"city\": \"Anytown\",\n  \"stateProvince\": \"KS\",\n  \"postalCode\": \"12345\",\n  \"country\": \"USA\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/contacts",
+					"host": ["{{baseUrl}}"],
+					"path": ["contacts"]
+				}
+			}
+		},
+		{
+			"name": "Test Case 6: Get Contact List",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response is an array of contacts\", function () {",
+							"    const jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.be.an(\"array\").that.is.not.empty;",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/contacts",
+					"host": ["{{baseUrl}}"],
+					"path": ["contacts"]
+				}
+			}
+		},
+		{
+			"name": "Test Case 7: Get Contact",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Contact details match retrieved contactId\", function () {",
+							"    const jsonData = pm.response.json();",
+							"    pm.expect(jsonData._id).to.eql(pm.environment.get(\"contactId\"));",
+							"    pm.expect(jsonData.firstName).to.eql(\"John\");",
+							"    pm.expect(jsonData.lastName).to.eql(\"Doe\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/contacts/{{contactId}}",
+					"host": ["{{baseUrl}}"],
+					"path": ["contacts", "{{contactId}}"]
+				}
+			}
+		},
+		{
+			"name": "Test Case 8: Update Contact",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Validate email and updated details\", function () {",
+							"    const jsonData = pm.response.json();",
+							"    pm.expect(jsonData.firstName).to.eql(\"Amy\");",
+							"    pm.expect(jsonData.lastName).to.eql(\"Miller\");",
+							"    pm.expect(jsonData.email).to.eql(\"amiller@fake.com\");",
+							"    pm.expect(jsonData.country).to.eql(\"Canada\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"firstName\": \"Amy\",\n  \"lastName\": \"Miller\",\n  \"birthdate\": \"1992-02-02\",\n  \"email\": \"amiller@fake.com\",\n  \"phone\": \"8005554242\",\n  \"street1\": \"13 School St.\",\n  \"street2\": \"Apt. 5\",\n  \"city\": \"Washington\",\n  \"stateProvince\": \"QC\",\n  \"postalCode\": \"A1A1A1\",\n  \"country\": \"Canada\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/contacts/{{contactId}}",
+					"host": ["{{baseUrl}}"],
+					"path": ["contacts", "{{contactId}}"]
+				}
+			}
+		},
+		{
+			"name": "Test Case 9: Update Contact Partial",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Validate firstName updated to Anna\", function () {",
+							"    const jsonData = pm.response.json();",
+							"    pm.expect(jsonData.firstName).to.eql(\"Anna\");",
+							"    pm.expect(jsonData.lastName).to.eql(\"Miller\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"firstName\": \"Anna\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/contacts/{{contactId}}",
+					"host": ["{{baseUrl}}"],
+					"path": ["contacts", "{{contactId}}"]
+				}
+			}
+		},
+		{
+			"name": "Test Case 10: Logout User",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/users/logout",
+					"host": ["{{baseUrl}}"],
+					"path": ["users", "logout"]
+				}
+			}
+		}
+	]
+}
