@@ -6,7 +6,7 @@
         <listener class-name="com.telecom.api.listeners.TestListener" />
     </listeners>
 
-    <test name="End-to-End Workflow & Module Tests">
+    <test name="End-to-End Workflow and Module Tests">
         <classes>
             <class name="com.telecom.api.tests.EndToEndWorkflowTest" />
             <class name="com.telecom.api.tests.UserTests" />
