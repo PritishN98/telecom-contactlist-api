@@ -37,6 +37,6 @@ public class UserTests {
     @Test(priority = 3, description = "Negative Test: Login with Invalid Password")
     public void testInvalidLogin() {
         Response response = UserEndpoints.loginUser(userEmail != null ? userEmail : "nonexistent@fake.com", "WrongPassword!");
-        Assert.assertEquals(response.getStatusCode(), 400);
+        Assert.assertEquals(response.getStatusCode(), 401, "Expected 401 Unauthorized for invalid login credentials");
     }
 }
